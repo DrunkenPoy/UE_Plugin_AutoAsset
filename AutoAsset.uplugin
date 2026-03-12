@@ -1,0 +1,16 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "Auto Asset Tool",
+  "CanContainContent": true,
+  "Description": "임포트 시 에셋 이름을 자동적으로 수정합니다. 에셋을 관리할 수 있는 에디터 유틸리티를제공합니다.",
+  "Category": "Editor",
+  "Modules": [
+    {
+      "Name": "AutoAsset",
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit"
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "PrefixNameModule.h"
+
+#include "Editor.h"
+#include "Subsystems/ImportSubsystem.h"
+#include "AssetToolsModule.h"
+#include "PhysicsEngine/PhysicsAsset.h"
+#include "Misc/PackageName.h"
+
+PrefixNameModule::PrefixNameModule()
+{
+}
+
+PrefixNameModule::~PrefixNameModule()
+{
+}
+
+void PrefixNameModule::StartupModule()
+{
+    if (!GEditor)
+        return;
+
+    UImportSubsystem* ImportSubsystem =
+        GEditor->GetEditorSubsystem<UImportSubsystem>();
+
+    // FBX / 에셋 임포트 후 이벤트 바인딩
+    m_AssetPostImportHandle = ImportSubsystem->OnAssetPostImport.AddRaw(
+        this, &PrefixNameModule::HandlePostImported);
+}
+
+void PrefixNameModule::ShutdownModule()
+{
+    if (GEditor)
+    {
+        if (UImportSubsystem* ImportSubsystem = GEditor->GetEditorSubsystem<UImportSubsystem>())
+        {
+            if (m_AssetPostImportHandle.IsValid())
+            {
+                ImportSubsystem->OnAssetPostImport.Remove(m_AssetPostImportHandle);
+                m_AssetPostImportHandle.Reset();
+            }
+        }
+    }
+}
+
+
+
+void PrefixNameModule::HandlePostImported(UFactory*, UObject* AssetCreated)
+{
+    // 1) SkeletalMesh 임포트
+    if (USkeletalMesh* SKM = Cast<USkeletalMesh>(AssetCreated))
+    {
+        // ─ 메시 이름
+        RenameWithAsset(SKM, TEXT("SK_"), nullptr);
+
+        // ─ 연결된 Skeleton 이름
+        RenameWithAsset(SKM->GetSkeleton(),TEXT("SKEL_"), TEXT("_Skeleton"));
+
+        // ─ 연결된 PhysicsAsset 이름
+        RenameWithAsset(SKM->GetPhysicsAsset(),TEXT("PHYS_"), TEXT("_PhysicsAsset"));
+
+        return;// 다른 에셋엔 손대지 않음
+    }
+    // 4) Texture 임포트
+    if (UTexture* Tex = Cast<UTexture>(AssetCreated))
+    {
+        RenameWithAsset(Tex, TEXT("T_"),nullptr);
+        return;
+    }
+}
+FString PrefixNameModule::StripSuffix(const FString& Name, const TCHAR* Suffix)
+{
+    return (Suffix && Name.EndsWith(Suffix))
+    ? Name.LeftChop(FCString::Strlen(Suffix))
+    : Name;
+}
+
+FString PrefixNameModule::AddPrefix(const FString& Name, const TCHAR* Prefix)
+{
+    return (Prefix && Name.StartsWith(Prefix))
+   ? Name
+   : FString(Prefix)+Name;
+}
+
+bool PrefixNameModule::RenameWithAsset(UObject* Asset, const TCHAR* Prefix, const TCHAR* OptionalSuffix)
+{
+    if (!Asset) return false;
+    FString BaseName = Asset->GetName();
+    // 이미 접두사가 있으면 패스
+    FString PrefixName = AddPrefix(BaseName,Prefix);
+    
+    FString SuffixName = StripSuffix(PrefixName, OptionalSuffix);
+    if ( BaseName == SuffixName &&  BaseName == PrefixName) return false;
+    
+    /*
+     * 에셋의 경로에서 경로만 가져옵니다.
+     * 예시:
+     *      /Game/Texture/SK_Asset  -- GetName()
+     * ->   /Game/Texture/          -- GetLongPackagePath()
+     */
+    const FString PkgPath = FPackageName::GetLongPackagePath(
+        Asset->GetOutermost()->GetName());
+    /*
+     * 에셋의 경로와 새로이 이름을 붙일 경로를 만듭니다.
+     * RenameAssets가 어레이를 받으므로 배열로 만듭니다.
+     */
+    TArray<FAssetRenameData> Batch;
+    Batch.Emplace(Asset, PkgPath, SuffixName);
+    /*
+     * 실제 에셋의 이름을 변경할 수 있도록 에셋 이름을 변경하기 위한 도구를 로드합니다.
+     */
+    FAssetToolsModule& AT =
+        FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+    return AT.Get().RenameAssets(Batch);
+}
+
+IMPLEMENT_MODULE(PrefixNameModule, AutoAsset)

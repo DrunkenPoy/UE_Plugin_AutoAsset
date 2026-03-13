@@ -17,8 +17,11 @@ AutoAsset은 언리얼 엔진에서 에셋 임포트 시 자동으로 에셋의 
 
 ### 2. 에셋 관리 에디터 유틸리티 (Editor Utility)
 플러그인 내에 포함된 에디터 유틸리티 블루프린트를 통해 에셋 네이밍 및 관리를 더 쉽게 할 수 있습니다. 
-* 에셋 관리 툴 경로: `AutoAsset Content/Editor/BP_AssetAction_Name`
-* (참고: 콘텐츠 브라우저 설정에서 '플러그인 콘텐츠 표시(Show Plugin Content)'를 켜야 보입니다.)
+특히 **스크립팅된 에셋 액션(Scripted Asset Action)** 및 **스크립팅된 액터 액션(Scripted Actor Action)** 기능을 통해 직관적인 워크플로우를 제공합니다.
+
+* **사용 방법**: 콘텐츠 브라우저에서 에셋을 우클릭하거나, 뷰포트 및 아웃라이너에서 액터를 우클릭하여 나오는 메뉴를 통해 커스텀 액션을 수행할 수 있습니다.
+* **에셋 관리 툴 경로**: `AutoAsset Content/Editor/EUBP_AssetImportAction`
+* **주의사항**: 에디터 유틸리티 블루프린트를 직접 확인하거나 수정하려면 콘텐츠 브라우저 설정에서 **'플러그인 콘텐츠 표시(Show Plugin Content)'** 옵션을 켜야 합니다.
 
 ## 설치 및 적용 방법 (Installation)
 1. GitHub 리포지토리의 **[Releases]** 탭에서 제공되는 최신 릴리즈 압축파일(`.zip`)을 다운로드합니다.

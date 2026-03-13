@@ -14,6 +14,9 @@ AutoAsset은 언리얼 엔진에서 에셋 임포트 시 자동으로 에셋의 
 * **Physics Asset**: `PHYS_` 접두사 추가 및 `_PhysicsAsset` 접미사 제거
 * **Texture**: `T_` 접두사 자동 추가
 * **Sound Wave**: `SW_` 접두사 자동 추가
+* **Material**: `M_` 접두사 자동 추가
+* **Material Instance**: `MI_` 접두사 자동 추가
+* **Animation Sequence**: `AS_` 접두사 자동 추가
 
 ### 2. 에셋 관리 에디터 유틸리티 (Editor Utility)
 플러그인 내에 포함된 에디터 유틸리티 블루프린트를 통해 에셋 네이밍 및 관리를 더 쉽게 할 수 있습니다. 

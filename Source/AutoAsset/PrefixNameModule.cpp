@@ -8,6 +8,8 @@
 #include "AssetToolsModule.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "Misc/PackageName.h"
+#include "Engine/StaticMesh.h"
+#include "Sound/SoundWave.h"
 
 PrefixNameModule::PrefixNameModule()
 {
@@ -63,10 +65,25 @@ void PrefixNameModule::HandlePostImported(UFactory*, UObject* AssetCreated)
 
         return;// 다른 에셋엔 손대지 않음
     }
-    // 4) Texture 임포트
+
+    // 2) StaticMesh 임포트
+    if (UStaticMesh* SM = Cast<UStaticMesh>(AssetCreated))
+    {
+        RenameWithAsset(SM, TEXT("SM_"), nullptr);
+        return;
+    }
+
+    // 3) Texture 임포트
     if (UTexture* Tex = Cast<UTexture>(AssetCreated))
     {
         RenameWithAsset(Tex, TEXT("T_"),nullptr);
+        return;
+    }
+
+    // 4) SoundWave 임포트
+    if (USoundWave* Sound = Cast<USoundWave>(AssetCreated))
+    {
+        RenameWithAsset(Sound, TEXT("SW_"), nullptr);
         return;
     }
 }

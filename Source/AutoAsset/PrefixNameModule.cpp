@@ -10,6 +10,9 @@
 #include "Misc/PackageName.h"
 #include "Engine/StaticMesh.h"
 #include "Sound/SoundWave.h"
+#include "Materials/Material.h"
+#include "Materials/MaterialInstanceConstant.h"
+#include "Animation/AnimSequence.h"
 
 PrefixNameModule::PrefixNameModule()
 {
@@ -84,6 +87,27 @@ void PrefixNameModule::HandlePostImported(UFactory*, UObject* AssetCreated)
     if (USoundWave* Sound = Cast<USoundWave>(AssetCreated))
     {
         RenameWithAsset(Sound, TEXT("SW_"), nullptr);
+        return;
+    }
+
+    // 5) Material 임포트
+    if (UMaterial* Material = Cast<UMaterial>(AssetCreated))
+    {
+        RenameWithAsset(Material, TEXT("M_"), nullptr);
+        return;
+    }
+
+    // 6) Material Instance 임포트 (메시 임포트 시 생성되는 머티리얼 인스턴스 등)
+    if (UMaterialInstanceConstant* MaterialInst = Cast<UMaterialInstanceConstant>(AssetCreated))
+    {
+        RenameWithAsset(MaterialInst, TEXT("MI_"), nullptr);
+        return;
+    }
+
+    // 7) Animation Sequence 임포트
+    if (UAnimSequence* AnimSeq = Cast<UAnimSequence>(AssetCreated))
+    {
+        RenameWithAsset(AnimSeq, TEXT("AS_"), nullptr);
         return;
     }
 }

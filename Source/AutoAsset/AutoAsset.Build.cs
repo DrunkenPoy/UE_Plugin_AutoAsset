@@ -13,7 +13,9 @@ public class AutoAsset : ModuleRules
             "Engine",
             "UnrealEd",
             "EditorSubsystem",
-            "AssetTools"
+            "AssetTools",
+            "Blutility",
+            "UMGEditor"
         });
     }
 }

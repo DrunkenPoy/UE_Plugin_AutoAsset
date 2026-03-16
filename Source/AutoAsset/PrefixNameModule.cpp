@@ -13,6 +13,10 @@
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Animation/AnimSequence.h"
+#include "Misc/ConfigCacheIni.h"
+#include "CoreGlobals.h"
+#include "EditorUtilitySubsystem.h"
+#include "EditorUtilityWidgetBlueprint.h"
 
 PrefixNameModule::PrefixNameModule()
 {
@@ -33,6 +37,44 @@ void PrefixNameModule::StartupModule()
     // FBX / 에셋 임포트 후 이벤트 바인딩
     m_AssetPostImportHandle = ImportSubsystem->OnAssetPostImport.AddRaw(
         this, &PrefixNameModule::HandlePostImported);
+
+    // EUBP 자동 실행 구문 (UEditorUtilitySubsystem 활용)
+    UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+    if (EditorUtilitySubsystem)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[AutoAsset] Starting BP Loading in StartupModule."));
+
+        // 유틸리티 에셋 경로 리스트
+        TArray<FString> StartupBPPaths = {
+            TEXT("/AutoAsset/Editor/EUBP_AssetImportAction.EUBP_AssetImportAction"),
+            TEXT("/AutoAsset/Editor/EUBP_StaticmeshActorAction.EUBP_StaticmeshActorAction")
+        };
+
+        for (const FString& PathStr : StartupBPPaths)
+        {
+            FSoftObjectPath SoftPath(PathStr);
+            UObject* Asset = SoftPath.TryLoad();
+            if (Asset)
+            {
+                if (EditorUtilitySubsystem->TryRun(Asset))
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("[AutoAsset] Successfully executed Editor Utility: %s"), *PathStr);
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("[AutoAsset] Failed to execute Editor Utility (TryRun failed): %s"), *PathStr);
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("[AutoAsset] Failed to load Editor Utility asset: %s. Is the plugin content available?"), *PathStr);
+            }
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("[AutoAsset] EditorUtilitySubsystem is invalid. Cannot run BPs."));
+    }
 }
 
 void PrefixNameModule::ShutdownModule()
